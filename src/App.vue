@@ -1,5 +1,5 @@
 <template>
-  <div id="cesiumContainer"></div>
+  <div id="contain" class="cesiumContainer"></div>
 </template>
 <script setup lang="ts">
 import { onMounted } from 'vue';
@@ -10,7 +10,7 @@ const token = import.meta.env.VITE_API_TOKEN;
 Cesium.Ion.defaultAccessToken = token;
 
 onMounted(() => {
-  const viewer = new Cesium.Viewer('cesiumContainer', {});
+  const viewer = new Cesium.Viewer('contain', {});
   console.log(viewer);
 });
 </script>

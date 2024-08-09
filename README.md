@@ -71,7 +71,7 @@ yarn dev
 
 ![cesium官网](/src/assets/images/cesium.jpeg)
 
-![Default Token](/src/assets/images/tokendemo.jpeg)
+![Default Token](/src/assets/images/token.jpeg)
 
 ### Hello Cesium
 
@@ -108,5 +108,7 @@ yarn dev
 ```
 
 ![效果](/src/assets/images/demo.jpeg)
+
+## 参考文档
 
 - [Cesium 速通](https://blog.csdn.net/weixin_64684095/article/details/139727206)
