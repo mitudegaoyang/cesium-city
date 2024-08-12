@@ -251,6 +251,66 @@ onMounted(() => {
 
 ![定义3D样式](/src/assets/images/heightStyle.jpeg)
 
+### 加载街区 Geojson 文件
+
+相关 Geojson 资源[下载地址](https://github.com/CesiumGS/cesium-workshop/tree/main/Source/SampleData)
+
+将资源放置于`/public/assets/SampleData`目录下，引入 Geojson 文件并添加实体。
+
+```js
+onMounted(() => {
+  const viewer = new Cesium.Viewer('contain', {});
+
+  let neighborHoodsPromise = Cesium.GeoJsonDataSource.load(
+    './assets/SampleData/sampleNeighborhoods.geojson'
+  );
+  let neighborHoods;
+
+  neighborHoodsPromise.then((data: any) => {
+    // 将数据添加到查看器
+    viewer.dataSources.add(data);
+    neighborHoods = data.entities;
+    let neighborHoodsEntities = data.entities.values;
+    neighborHoodsEntities.map((item: any) => {
+      let entity = item;
+      if (Cesium.defined(entity.polygon)) {
+        entity.name = entity.properties.neighborhood;
+        entity.polygon.material = Cesium.Color.fromRandom({
+          red: 0.1,
+          maximumGreen: 0.5,
+          minimumBlue: 0.5,
+          alpha: 0.6
+        });
+
+        entity.polygon.classificationType = Cesium.ClassificationType.TERRAIN;
+
+        let polyPositions = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now()).positions;
+
+        let polyCenter = Cesium.BoundingSphere.fromPoints(polyPositions).center;
+        polyCenter = Cesium.Ellipsoid.WGS84.scaleToGeocentricSurface(polyCenter);
+        entity.position = polyCenter;
+
+        // 生成标签
+        entity.label = {
+          text: entity.name, // 内容
+          showBackground: true, // 是否有背景颜色
+          scale: 0.6, // 透明度
+          fillColor: Cesium.Color.YELLOWGREEN, // 字体颜色
+          backgroundColor: new Cesium.Color(255, 255, 0, 0.5), // 背景颜色
+          horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // 相对于对象的原点的水平位置 原点位于对象的水平中心
+          verticalOrigin: Cesium.VerticalOrigin.BOTTON, // 相对于对象的原点的垂直位置 原点位于对象的底部
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(10, 8000), // 展示范围条件
+          disableDepthTestDistance: 100, // 禁用距离
+          pixelOffset: new Cesium.Cartesian2(0, -10) // 水平/垂直 偏移量
+        };
+      }
+    });
+  });
+});
+```
+
+![Geojson文件](/src/assets/images/geoJsonDataSource.jpeg)
+
 ## 参考文档
 
 - [Cesium 速通](https://blog.csdn.net/weixin_64684095/article/details/139727206)

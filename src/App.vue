@@ -16,6 +16,8 @@ onMounted(() => {
   });
 
   const viewer = new Cesium.Viewer('contain', {
+    infoBox: false, // 右侧信息框
+    selectionIndicator: false, // 选中状态隐藏
     timeline: false, // 时间轴控件
     animation: false, // 动画控件
     geocoder: false, // 搜索按钮
@@ -71,6 +73,54 @@ onMounted(() => {
   });
 
   city.style = heightStyle;
+
+  // Geojson文件加载
+  let neighborHoodsPromise = Cesium.GeoJsonDataSource.load(
+    './assets/SampleData/sampleNeighborhoods.geojson'
+  );
+  let neighborHoods;
+
+  neighborHoodsPromise.then((data: any) => {
+    // 将数据添加到查看器
+    viewer.dataSources.add(data);
+    neighborHoods = data.entities;
+    let neighborHoodsEntities = data.entities.values;
+    neighborHoodsEntities.map((item: any) => {
+      let entity = item;
+      if (Cesium.defined(entity.polygon)) {
+        entity.name = entity.properties.neighborhood;
+        entity.polygon.material = Cesium.Color.fromRandom({
+          red: 0.1,
+          maximumGreen: 0.5,
+          minimumBlue: 0.5,
+          alpha: 0.6
+        });
+
+        entity.polygon.classificationType = Cesium.ClassificationType.TERRAIN;
+
+        let polyPositions = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now()).positions;
+
+        let polyCenter = Cesium.BoundingSphere.fromPoints(polyPositions).center;
+        polyCenter = Cesium.Ellipsoid.WGS84.scaleToGeocentricSurface(polyCenter);
+        entity.position = polyCenter;
+
+        // 生成标签
+        entity.label = {
+          text: entity.name, // 内容
+          showBackground: true, // 是否有背景颜色
+          scale: 0.6, // 透明度
+          fillColor: Cesium.Color.YELLOWGREEN, // 字体颜色
+          backgroundColor: new Cesium.Color(255, 255, 0, 0.5), // 背景颜色
+          horizontalOrigin: Cesium.HorizontalOrigin.CENTER, // 相对于对象的原点的水平位置 原点位于对象的水平中心
+          verticalOrigin: Cesium.VerticalOrigin.BOTTON, // 相对于对象的原点的垂直位置 原点位于对象的底部
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(10, 8000), // 展示范围条件
+          disableDepthTestDistance: 100, // 禁用距离
+          pixelOffset: new Cesium.Cartesian2(0, -10) // 水平/垂直 偏移量
+        };
+      }
+    });
+  });
+  // viewer.add(neighborHoodsPromise);
 
   console.log(viewer);
 });
