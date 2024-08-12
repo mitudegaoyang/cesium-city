@@ -167,6 +167,15 @@ onMounted(() => {
 });
 ```
 
+```css
+<style scoped>
+/* 隐藏左下角logo */
+:deep(.cesium-viewer-bottom) {
+  display: none;
+}
+</style>
+```
+
 ![控件](/src/assets/images/control.jpeg)
 
 ### 相机
@@ -182,7 +191,7 @@ onMounted(() => {
   const viewer = new Cesium.Viewer('contain', {});
 
   // 定义相机坐标
-  const position = Cesium.Cartesian3.fromDegrees(113.318977, 23.114155, 2000);
+  const position = Cesium.Cartesian3.fromDegrees(113.318977, 23.114155, 2000); // 广州塔坐标
 
   // 设置相机目的地
   viewer.camera.setView({
@@ -200,9 +209,52 @@ onMounted(() => {
 
 ![相机](/src/assets/images/camera.jpeg)
 
+### 3D 瓦片加载
+
+去资源库添加资源，在已添加资源处，可以查看用法。
+
+![添加 3D 瓦片](/src/assets/images/cesium3DTileset.jpeg)
+
+加载 New York City 3D Buildings
+
+```js
+onMounted(() => {
+  const viewer = new Cesium.Viewer('contain', {});
+
+  const city = viewer.scene.primitives.add(
+    new Cesium.Cesium3DTileset({
+      url: Cesium.IonResource.fromAssetId(75343)
+    })
+  );
+  viewer.flyTo(city);
+
+  // 定义3D样式
+  let heightStyle = new Cesium.Cesium3DTileStyle({
+    color: {
+      // 根据条件判断具体的颜色
+      conditions: [
+        ['${Height} >= 300', 'rgba(45,0,75,0.4)'],
+        ['${Height} >= 200', 'rgb(102,71,151)'],
+        ['${Height} >= 100', 'rgba(170,162,204,0.5)'],
+        ['${Height} >= 50', 'rgba(224,226,238,0.6)'],
+        ['${Height} >= 25', 'rgba(252,230,200,0.7)'],
+        ['${Height} >= 10', 'rgba(248,176,87,0.8)'],
+        ['${Height} >= 5', 'rgba(198,106,11,0.9)'],
+        ['true', 'rgb(127,59,8)']
+      ]
+    }
+  });
+
+  city.style = heightStyle;
+});
+```
+
+![定义3D样式](/src/assets/images/heightStyle.jpeg)
+
 ## 参考文档
 
 - [Cesium 速通](https://blog.csdn.net/weixin_64684095/article/details/139727206)
+- [2024 年 Cesium 入门保姆级教程](https://www.bilibili.com/video/BV1BM4m1Q7id)
 - [Cesium 打造数字城市快速上手课程](https://www.bilibili.com/video/BV1X44y1x7J2)
 - [Cesium 中文文档](http://cesium.xin/cesium/cn/Documentation1.62/index.html)
 - [Cesium 官网](https://cesium.com/)

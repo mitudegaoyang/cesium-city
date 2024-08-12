@@ -16,15 +16,23 @@ onMounted(() => {
   });
 
   const viewer = new Cesium.Viewer('contain', {
-    imageryProvider: esri, // 自定义图层，默认是谷歌的影像图层
-    terrainProvider: Cesium.createWorldTerrain({
-      requestWaterMask: true, // 水面特效
-      requestVertexNormals: true // 顶点法线
-    }) // 地形图层
+    timeline: false, // 时间轴控件
+    animation: false, // 动画控件
+    geocoder: false, // 搜索按钮
+    homeButton: false, // 主页按钮
+    sceneModePicker: false, // 投影方式按钮
+    baseLayerPicker: false, // 图层选择按钮
+    navigationHelpButton: false, // 帮助手势按钮
+    fullscreenButton: false, // 全屏按钮
+    imageryProvider: esri // 自定义图层，默认是谷歌的影像图层
+    // terrainProvider: Cesium.createWorldTerrain({
+    //   requestWaterMask: true, // 水面特效
+    //   requestVertexNormals: true // 顶点法线
+    // }) // 地形图层
   });
 
   // 定义相机坐标
-  const position = Cesium.Cartesian3.fromDegrees(113.318977, 23.114155, 2000);
+  const position = Cesium.Cartesian3.fromDegrees(-74.008813, 40.679506, 3000);
 
   // 设置相机目的地
   viewer.camera.setView({
@@ -38,7 +46,38 @@ onMounted(() => {
     }
   });
 
+  const city = viewer.scene.primitives.add(
+    new Cesium.Cesium3DTileset({
+      url: Cesium.IonResource.fromAssetId(75343)
+    })
+  );
+  // viewer.flyTo(city);
+
+  // 定义3D样式
+  let heightStyle = new Cesium.Cesium3DTileStyle({
+    color: {
+      // 根据条件判断具体的颜色
+      conditions: [
+        ['${Height} >= 300', 'rgba(45,0,75,0.4)'],
+        ['${Height} >= 200', 'rgb(102,71,151)'],
+        ['${Height} >= 100', 'rgba(170,162,204,0.5)'],
+        ['${Height} >= 50', 'rgba(224,226,238,0.6)'],
+        ['${Height} >= 25', 'rgba(252,230,200,0.7)'],
+        ['${Height} >= 10', 'rgba(248,176,87,0.8)'],
+        ['${Height} >= 5', 'rgba(198,106,11,0.9)'],
+        ['true', 'rgb(127,59,8)']
+      ]
+    }
+  });
+
+  city.style = heightStyle;
+
   console.log(viewer);
 });
 </script>
-<style scoped></style>
+<style scoped>
+/* 隐藏左下角logo */
+:deep(.cesium-viewer-bottom) {
+  display: none;
+}
+</style>
